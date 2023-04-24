@@ -1,0 +1,40 @@
+name: Invoke cosmosdb failback
+on:
+  workflow_call:
+    inputs:
+      cosmosdb_resource_group_name:
+        required: true
+        type: string
+      cosmosdb_name: 
+        type: string
+        required: true
+      cosmosdb_primary_region:
+        required: true
+        type: string
+      cosmosdb_secondary_region:
+        required: true
+        type: string 
+    secrets:
+      AZURE_CREDENTIALS_DELOITTE_SUB:
+        required: true
+jobs:  
+  Invoke_cosmosdb_failback:
+    permissions:
+      contents: none
+    runs-on: ubuntu-latest       
+    steps:
+    - name: checkout
+      uses: actions/checkout@v2
+      with:
+        repository: SNawazmac/cosmosdb_failback
+    - name: Login via Az module
+      uses: azure/login@v1
+      with:
+        creds: ${{secrets.AZURE_CREDENTIALS_DELOITTE_SUB}}
+        enable-AzPSSession: true   
+    - name: Invoke cosmosdb failback
+      uses: azure/powershell@v1
+      with:
+        inlineScript: |
+         ./cosmosdb_failback.ps1 -cosmosdb_resource_group_name "${{inputs.cosmosdb_resource_group_name}}" -cosmosdb_name "${{inputs.cosmosdb_name}}" -cosmosdb_primary_region "${{inputs.cosmosdb_primary_region}}" -cosmosdb_secondary_region "${{inputs.cosmosdb_secondary_region}}"
+        azPSVersion: "latest"
